@@ -20,6 +20,6 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["./**/*"],
+  "include": ["./**/*", "../src/app/(auth)/layout.tsx"],
   "exclude": ["./_generated"]
 }

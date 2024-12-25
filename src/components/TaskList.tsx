@@ -5,6 +5,9 @@ interface Task {
   _id: string;
   title: string;
   completed: boolean;
+  category: string;
+  status: string;
+  createdAt: number;
 }
 
 interface TaskListProps {
@@ -22,6 +25,8 @@ export default function TaskList({ tasks,  onDeleteTask }: TaskListProps) {
           >
             {task.title}
           </span>
+          <p>{task?.category} - {task?.status}</p>
+          <p className="text-gray-500">Created: {new Date(task?.createdAt).toLocaleDateString()}</p>
           <Button
             onClick={() => onDeleteTask(task._id)}
             className="bg-red-500 hover:bg-red-600 text-white text-sm w-9 h-9 rounded-full"

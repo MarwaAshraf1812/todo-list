@@ -8,7 +8,7 @@ const DeleteTaskInput = {
 
 export const deleteTask =  mutation({
   args: DeleteTaskInput,
-  handler: async ({ db }, { id}) => {
+  handler: async ({ db }, {id}) => {
     await db.delete(id);
   },
 });
