@@ -1,14 +1,12 @@
-import { useUser } from '@clerk/nextjs';
+import { auth} from '@clerk/nextjs/server'
+import TaskManager from "@/components/TaskManager";
 
-const DashboardPage = () => {
-  const { user } = useUser();
+export default async function Dashboard() {
+  const { userId } = await auth();
 
-  return (
-    <div>
-      <h1>Welcome {user?.firstName}</h1>
-      <p>Your dashboard</p>
-    </div>
-  );
-};
+  if (!userId) {
+    return <div>Please log in to view your tasks.</div>;
+  }
 
-export default DashboardPage;
+  return <TaskManager userId={userId} />;
+}

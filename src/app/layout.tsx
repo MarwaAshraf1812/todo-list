@@ -1,7 +1,9 @@
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { ClerkProvider } from '@clerk/nextjs';
 import { ConvexClientProvider } from './ConvexClientProvider';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import Navbar from '../components/Navbar/navbar';
+import Footer from '@/components/Footer/Footer';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -23,15 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <header className='flex justify-between items-center p-4 bg-black text-white'>
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header>
+        <Navbar />
           <ConvexClientProvider>{children}</ConvexClientProvider>
+          <Footer />
         </body>
       </html>
     </ClerkProvider>

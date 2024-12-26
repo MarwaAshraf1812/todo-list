@@ -11,3 +11,7 @@ body {
     --radius: 0.5rem;
   }
 }
+
+.fixed_height {
+  height: calc(100vh - 2rem);
+}

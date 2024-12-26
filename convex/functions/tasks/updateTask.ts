@@ -2,10 +2,10 @@ import { mutation } from "../../_generated/server";
 import { v } from "convex/values";
 
 
-export const updateTaskStatus = mutation({
+export const updateTask = mutation({
   args: {
     taskId: v.id("tasks"),
-    status: v.union(),
+    status: v.string(),
   },
   handler: async ({ db }, { taskId, status }) => {
     return db.patch(taskId, {
