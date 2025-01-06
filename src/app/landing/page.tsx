@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "../../components/ui/button";
 function LandingPage() {
   return (
+    <>
     <div className="fixed_height flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-500  text-white">
       <h1 className="lg:text-5xl  md:text-4xl text-3xl font-bold mb-6">
         Welcome to Your To-Do List
@@ -16,6 +17,7 @@ function LandingPage() {
         </Button>
       </Link>
     </div>
+    </>
   );
 }
 

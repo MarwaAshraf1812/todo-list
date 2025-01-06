@@ -1,4 +1,4 @@
-import { auth} from '@clerk/nextjs/server'
+import { auth } from "@clerk/nextjs/server";
 import TaskManager from "@/components/TaskManager";
 
 export default async function Dashboard() {
