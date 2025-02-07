@@ -1,5 +1,3 @@
-"use client";
-import React from 'react';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
@@ -7,7 +5,7 @@ import { Input } from '../ui/input';
 
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-10">
+    <footer className="bg-white text-black py-10">
       <div className="container mx-auto px-6 lg:px-24 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <h3 className="text-xl font-bold mb-4">About</h3>
@@ -40,10 +38,10 @@ function Footer() {
             <Input
               type="email"
               placeholder="Your Email"
-              className="p-2 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="p-2 rounded bg-gray-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <Button type="submit" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+            <Button type="submit" className="bg-lavender-600  text-white hover:bg-lavender-700">
               Subscribe
             </Button>
           </form>
@@ -61,7 +59,7 @@ function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-gray-800 mt-10 pt-6 text-center text-sm">
+      <div className="border-t border-gray-300 mt-10 pt-6 text-center text-sm">
         <p>&copy; {new Date().getFullYear()} TodoApp. All rights reserved.</p>
       </div>
     </footer>

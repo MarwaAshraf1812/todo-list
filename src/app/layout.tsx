@@ -1,5 +1,5 @@
 import { ClerkProvider } from '@clerk/nextjs';
-import { ConvexClientProvider } from './ConvexClientProvider';
+import ConvexClientProvider from './ConvexClientProvider';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Navbar from '../components/Navbar/navbar';
@@ -23,7 +23,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang='en' suppressHydrationWarning>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Navbar />
           <ConvexClientProvider>{children}</ConvexClientProvider>

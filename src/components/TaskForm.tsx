@@ -1,62 +1,176 @@
-"use client";
+"use client"
 import { useState } from "react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { Id } from "convex/react";
+
+// Define proper types to match your schema
+type Priority = "low" | "medium" | "high";
+type Status = "pending" | "in_progress" | "completed";
+
+interface Task {
+  id: Id<"tasks">;
+  title: string;
+  description?: string;
+  priority: Priority;
+  status: Status;
+  categoryId: Id<"categories">;
+  userId: string;
+  createdAt: number;
+  updatedAt?: number;
+}
 
 interface TaskFormProps {
-  onAddTask: (task: { title: string; category: string; status: string }) => void;
+  onSubmit: (task: {
+    title: string;
+    description?: string;
+    priority: Priority;
+    categoryId: Id<"categories">;
+  }) => void;
+  initialTask?: Task;
+  onCancel?: () => void;
+  categories: { id: Id<"categories">; name: string;}[];
 }
 
-function TaskForm({ onAddTask }: TaskFormProps) {
-  const [task, setTask] = useState("");
-  const [category, setCategory] = useState("");
-  const [status, setStatus] = useState("new");
+export function TaskForm({
+  onSubmit,
+  initialTask,
+  onCancel,
+  categories
+}: TaskFormProps) {
+  const [title, setTitle] = useState(initialTask?.title || "");
+  const [description, setDescription] = useState(
+    initialTask?.description || ""
+  );
+  const [priority, setPriority] = useState<Priority>(
+    initialTask?.priority || "medium"
+  );
+  const [categoryId, setCategoryId] = useState<Id<"categories"> | null>(
+    initialTask?.categoryId || (categories.length > 0 ? categories[0].id : null)
+  );
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!task || !category) return;
-    onAddTask({ title: task, category, status });
-    setTask("");
-    setCategory("");
-    setStatus("new");
+
+    if (!title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+
+    if (!categoryId) {
+      toast.error("Please select a category");
+      return;
+    }
+
+    if (categories.length === 0) {
+      toast.error("No categories available. Please create a category first.");
+      return;
+    }
+
+    onSubmit({
+      title: title.trim(),
+      priority,
+      description: description.trim() || undefined,
+      categoryId,
+    });
+
+    // Only reset form if we're not editing
+    if (!initialTask) {
+      setTitle("");
+      setDescription("");
+      setPriority("medium");
+      setCategoryId(categories.length > 0 ? categories[0].id : null);
+    }
   };
 
-  return (
-    <div className="p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4"
-      >
-        <Input
-          type="text"
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 w-full md:w-auto"
-        />
-        <Input
-          type="text"
-          placeholder="Task"
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 w-full md:w-auto"
-        />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="border border-gray-300 rounded-md p-2 w-full md:w-auto"
-        >
-          <option value="new">New</option>
-          <option value="doing">Doing</option>
-          <option value="done">Done</option>
-        </select>
+  // Show message if no categories are available
+  if (categories.length === 0) {
+    return (
+      <div className="p-4 bg-yellow-50 text-yellow-800 rounded-md">
+        Please create a category before adding tasks.
+      </div>
+    );
+  }
 
-        <Button className="bg-blue-500 text-white p-2 rounded-md w-full md:w-auto">
-          Add Task
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h1 className="text-xl font-bold">
+        {initialTask ? "Edit Task" : "Add New Task"}
+      </h1>
+
+      <div className="space-y-2">
+        <Input
+          placeholder="Task title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          maxLength={100}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Textarea
+          placeholder="Task description (optional)"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          maxLength={500}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Select
+          value={priority}
+          onValueChange={(value: Priority) => setPriority(value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select priority" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Select
+          value={categoryId || ""}
+          onValueChange={(value) => setCategoryId(value as Id<"categories">)}
+          required
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex gap-2">
+        <Button type="submit">
+          {initialTask ? "Update Task" : "Add Task"}
         </Button>
-      </form>
-    </div>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        )}
+      </div>
+    </form>
   );
 }
-
-export default TaskForm;
