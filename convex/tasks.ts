@@ -42,8 +42,8 @@ export const createTask = mutation({
       categoryId,
       completed: false,
       description: description || "",
-      priority: priority || "Medium",
-      status: status || "Pending",
+      priority: priority || "Low",
+      status: status || "Todo",
       createdAt: Date.now(),
     });
   },

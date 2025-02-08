@@ -3,24 +3,30 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { RiDashboardHorizontalFill } from "react-icons/ri";
-import { LuHistory } from "react-icons/lu";
-import { CiSettings } from "react-icons/ci";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { Input } from "../ui/input";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useAuth } from "@clerk/nextjs";
+import { FaPlus } from "react-icons/fa";
+import { cn } from "@/lib/utils";
 
-export default function AppSidebar() {
+interface AppSidebarProps {
+  onCategorySelect: (categoryId: string | null) => void;
+}
+
+export default function AppSidebar({ onCategorySelect }: AppSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [categoryName, setCategoryName] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  console.log('Current:', selectedCategory);
 
   const { userId } = useAuth();
 
   const createCategory = useMutation(api.tasks.createCategory);
   const categories = useQuery(api.tasks.getCategories) || [];
-  
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -39,9 +45,7 @@ export default function AppSidebar() {
     }
   }, []);
 
-  const handleAddCategory = async (
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
+  const handleAddCategory = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (!categoryName.trim()) return;
 
@@ -57,22 +61,29 @@ export default function AppSidebar() {
     }
   };
 
+  const handleCategoryClick = (categoryId: string) => {
+    const newSelectedId = selectedCategory === categoryId ? null : categoryId;
+    setSelectedCategory(newSelectedId);
+    onCategorySelect(newSelectedId);
+  };
+
   return (
     <div className="h-full relative">
       <div
-        className={`${
-          isCollapsed ? "w-16" : "w-64"
-        } bg-white text-black p-4 transition-all duration-300 h-full overflow-hidden z-30 border border-r-slate-400 ${
+        className={cn(
+          "bg-white text-black p-4 transition-all duration-300 h-full overflow-hidden z-30 border-r border-slate-200",
+          isCollapsed ? "w-16" : "w-64",
           isMobile ? "absolute top-0 left-0 h-full" : "relative"
-        }`}
+        )}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2
-            className={`text-xl font-bold ${isCollapsed ? "hidden" : "block"}`}
-          >
+          <h2 className={cn("text-xl font-bold", isCollapsed && "hidden")}>
             Dashboard
           </h2>
-          <button onClick={() => setIsCollapsed(!isCollapsed)}>
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
             {isCollapsed ? <FaBars /> : <FaTimes />}
           </button>
         </div>
@@ -81,70 +92,49 @@ export default function AppSidebar() {
           <li>
             <Link
               href="/dashboard"
-              className="flex items-center hover:text-gray-400"
+              className="flex items-center p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <RiDashboardHorizontalFill className="inline text-xl" />
-              <span
-                className={`ml-2 transition-opacity ${isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}
-              >
+              <RiDashboardHorizontalFill className="text-xl" />
+              <span className={cn("ml-2", isCollapsed && "hidden")}>
                 Overview
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/dashboard/history"
-              className="flex items-center hover:text-gray-400"
-            >
-              <LuHistory className="inline text-xl" />
-              <span
-                className={`ml-2 transition-opacity ${isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}
-              >
-                History
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/dashboard/settings"
-              className="flex items-center hover:text-gray-400"
-            >
-              <CiSettings className="inline text-xl" />
-              <span
-                className={`ml-2 transition-opacity ${isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}
-              >
-                Settings
               </span>
             </Link>
           </li>
         </ul>
 
-        <div
-          className={`mt-5 ${isCollapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}`}
-        >
-          <h3 className="text-sm font-semibold">Categories</h3>
-          <form onSubmit={handleAddCategory} className="mt-2 flex">
+        <div className={cn("mt-8", isCollapsed && "hidden")}>
+          <h3 className="text-sm font-semibold mb-3">Categories</h3>
+          <form onSubmit={handleAddCategory} className="flex gap-2 mb-4">
             <Input
               placeholder="Add new category"
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
+              className="flex-1"
             />
             <button
               type="submit"
-              className="ml-2 bg-blue-500 text-white px-3 py-1 rounded"
+              className="bg-primary text-primary-foreground p-2 rounded-lg hover:opacity-90 transition-opacity"
             >
-              Add
+              <FaPlus />
             </button>
           </form>
-          <ul className="flex flex-col mt-2">
+          <ul className="space-y-1">
             {categories?.length > 0 ? (
               categories.map((category) => (
-                <li key={category._id} className="flex items-center py-2">
+                <li 
+                  key={category._id}
+                  onClick={() => handleCategoryClick(category._id)}
+                  className={cn(
+                    "p-2 rounded-lg cursor-pointer transition-colors",
+                    "hover:bg-gray-100",
+                    selectedCategory === category._id && "bg-accent text-accent-foreground"
+                  )}
+                >
                   {category.name}
                 </li>
               ))
             ) : (
-              <li>No categories available</li>
+              <li className="text-sm text-muted-foreground">No categories available</li>
             )}
           </ul>
         </div>

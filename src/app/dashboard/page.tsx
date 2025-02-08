@@ -8,5 +8,7 @@ export default async function Dashboard() {
     return <div>Please log in to view your tasks.</div>;
   }
 
-  return <TaskManager userId={userId} />;
+  return (
+    <TaskManager userId={userId} />
+);
 }
