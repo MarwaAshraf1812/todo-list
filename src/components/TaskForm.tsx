@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, Id } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
@@ -18,34 +18,70 @@ import { useAuth } from "@clerk/nextjs";
 interface TaskFormProps {
   onClose: () => void;
   initialCategoryId?: string | null;
+  task?: {
+    _id: string;
+    title: string;
+    description: string;
+    categoryId: string;
+    priority: string;
+    status: string;
+  } | null;
 }
 
-export function TaskForm({ onClose, initialCategoryId }: TaskFormProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  
-  const [categoryId, setCategoryId] = useState<Id<"categories"> | null>(initialCategoryId ? { __tableName: "categories", id: initialCategoryId } : null);
-  const [priority, setPriority] = useState("Medium");
-  const [status, setStatus] = useState("Pending");
-
+export function TaskForm({ onClose, initialCategoryId, task }: TaskFormProps) {
+  const [title, setTitle] = useState(task?.title || "");
+  const [description, setDescription] = useState(task?.description || "");
+  const [categoryId, setCategoryId] = useState<Id<"categories"> | null>(
+    task?.categoryId
+      ? { __tableName: "categories", id: task.categoryId }
+      : initialCategoryId
+      ? { __tableName: "categories", id: initialCategoryId }
+      : null
+  );
+  const [priority, setPriority] = useState(task?.priority || "Medium");
+  const [status, setStatus] = useState(task?.status || "Todo");
 
   const { userId } = useAuth();
   const categories = useQuery(api.tasks.getCategories);
   const createTask = useMutation(api.tasks.createTask);
+  const updateTask = useMutation(api.tasks.updateTask);
+
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description);
+      setCategoryId({ __tableName: "categories", id: task.categoryId });
+      setPriority(task.priority);
+      setStatus(task.status);
+    }
+  }, [task]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (title && categoryId && userId) {
+
+    if (!title || !categoryId || !userId) return;
+
+    if (task) {
+      await updateTask({
+        title,
+        description,
+        categoryId: categoryId._id,
+        priority,
+        status,
+        taskId: task._id as Id<"tasks">,
+      });
+    } else {
       await createTask({
         title,
         description,
-        categoryId,
+        categoryId: categoryId.id,
         priority,
         status,
         userId,
       });
-      onClose();
     }
+
+    onClose();
   };
 
   return (
@@ -61,7 +97,7 @@ export function TaskForm({ onClose, initialCategoryId }: TaskFormProps) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <Select value={categoryId} onValueChange={setCategoryId} required>
+      <Select value={categoryId?.id || ""} onValueChange={(value) => setCategoryId({ __tableName: "categories", id: value })} required>
         <SelectTrigger>
           <SelectValue placeholder="Select category" />
         </SelectTrigger>
@@ -97,7 +133,7 @@ export function TaskForm({ onClose, initialCategoryId }: TaskFormProps) {
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit">Create Task</Button>
+        <Button type="submit">{task ? "Update Task" : "Create Task"}</Button>
       </div>
     </form>
   );

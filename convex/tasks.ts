@@ -76,15 +76,19 @@ export const updateTask = mutation({
   args: {
     taskId: v.id("tasks"),
     title: v.optional(v.string()),
+    description: v.optional(v.string()),
     completed: v.optional(v.boolean()),
     priority: v.optional(v.string()),
+    categoryId: v.optional(v.id("categories")),
     status: v.optional(v.string()),
   },
-  handler: async ({ db }, { taskId, title, completed, priority, status }) => {
+  handler: async ({ db }, { taskId, categoryId, title, description, completed, priority, status }) => {
     return await db.patch(taskId, {
       ...(title !== undefined && { title }),
       ...(completed !== undefined && { completed }),
+      ...(description !== undefined && { description }),
       ...(priority !== undefined && { priority }),
+      ...(categoryId !== undefined && { categoryId }),
       ...(status !== undefined && { status }),
       updatedAt: Date.now(),
     });
