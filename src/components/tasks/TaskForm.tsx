@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, Id } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,8 +35,8 @@ export function TaskForm({ onClose, initialCategoryId, task }: TaskFormProps) {
     task?.categoryId
       ? { __tableName: "categories", id: task.categoryId }
       : initialCategoryId
-      ? { __tableName: "categories", id: initialCategoryId }
-      : null
+        ? { __tableName: "categories", id: initialCategoryId }
+        : null
   );
   const [priority, setPriority] = useState(task?.priority || "Medium");
   const [status, setStatus] = useState(task?.status || "Todo");
@@ -97,7 +97,13 @@ export function TaskForm({ onClose, initialCategoryId, task }: TaskFormProps) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <Select value={categoryId?.id || ""} onValueChange={(value) => setCategoryId({ __tableName: "categories", id: value })} required>
+      <Select
+        value={categoryId?.id || ""}
+        onValueChange={(value) =>
+          setCategoryId({ __tableName: "categories", id: value })
+        }
+        required
+      >
         <SelectTrigger>
           <SelectValue placeholder="Select category" />
         </SelectTrigger>

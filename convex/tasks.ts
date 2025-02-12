@@ -7,6 +7,19 @@ export const getCategories = query({
   },
 })
 
+export const deleteCategory = mutation({
+  args: { categoryId: v.id("categories") },
+  handler: async ({ db }, { categoryId }) => {
+      const category = await db.get(categoryId);
+
+      if (!category) {
+        throw new Error("Category not found.");
+      }
+
+      await db.delete(categoryId);
+  }
+});
+
 /**
  * Create a new category
  */
@@ -82,16 +95,54 @@ export const updateTask = mutation({
     categoryId: v.optional(v.id("categories")),
     status: v.optional(v.string()),
   },
-  handler: async ({ db }, { taskId, categoryId, title, description, completed, priority, status }) => {
-    return await db.patch(taskId, {
+  handler: async ({ db }, { taskId, categoryId, title, description, priority, status }) => {
+    const task = await db.get(taskId);
+    if (!task) throw new Error("Task not found");
+
+    const isCompleted = status === "Completed";
+
+    await db.patch(taskId, {
       ...(title !== undefined && { title }),
-      ...(completed !== undefined && { completed }),
       ...(description !== undefined && { description }),
       ...(priority !== undefined && { priority }),
       ...(categoryId !== undefined && { categoryId }),
       ...(status !== undefined && { status }),
+      completed: isCompleted,
       updatedAt: Date.now(),
     });
+
+    if (isCompleted) {
+      const completedTasks = await db
+        .query("tasks")
+        .filter((q) => q.eq(q.field("completed"), true))
+        .order("asc")
+        .take(4);
+
+      if (completedTasks.length > 3) {
+        const oldestTask = completedTasks[0];
+
+        // ✅ Check if already archived
+        const alreadyArchived = await db
+          .query("task_history")
+          .filter((q) => q.eq(q.field("title"), oldestTask.title))
+          .first();
+
+        if (!alreadyArchived) {
+          await db.insert("task_history", {
+            archivedAt: Date.now(),
+            title: oldestTask.title,
+            description: oldestTask.description,
+            priority: oldestTask.priority,
+            status: oldestTask.status,
+            userId: oldestTask.userId,
+            createdAt: oldestTask.createdAt,
+          });
+
+          // ✅ Delete the original task after archiving
+          await db.delete(oldestTask._id);
+        }
+      }
+    }
   },
 });
 
@@ -104,3 +155,33 @@ export const deleteTask = mutation({
     await db.delete(taskId);
   },
 });
+
+// export const archiveTask = mutation({
+//   args: { taskId: v.id("tasks") },
+//   handler: async ({db}, {taskId}) => {
+//     const task = await db.get(taskId);
+//     if (!task) throw new Error("Task not found");
+
+//     await db.insert("task_history", {
+//       archivedAt: Date.now(),
+//       ...task,
+//     });
+
+//     await db.delete(taskId);
+//   }});
+
+
+export const getArchivedTasks = query({
+  handler: async ({ db }) => {
+    return await db.query("task_history").collect();
+  },
+});
+
+export const deleteAllTasks = mutation({
+  handler: async ({ db }) => {
+    const tasks = await db.query("task_history").collect();
+    for (const task of tasks) {
+      await db.delete(task._id);
+    }
+  }
+})

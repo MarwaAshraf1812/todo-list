@@ -18,5 +18,15 @@ export default defineSchema({
     categoryId: v.id("categories"),
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
-  })
+  }),
+
+  task_history: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    priority: v.optional(v.string()),
+    status: v.optional(v.string()),
+    userId: v.string(), 
+    createdAt: v.number(),
+    archivedAt: v.number(),
+  }),
 });

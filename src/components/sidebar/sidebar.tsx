@@ -5,28 +5,19 @@ import Link from "next/link";
 import { RiDashboardHorizontalFill } from "react-icons/ri";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { Input } from "../ui/input";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useAuth } from "@clerk/nextjs";
 import { FaPlus } from "react-icons/fa";
+import { MdHistory } from "react-icons/md";
 import { cn } from "@/lib/utils";
+import { useCategory } from "@/context/CategoryContext";
+import { useUser } from "@/context/UserProvider";
 
-interface AppSidebarProps {
-  onCategorySelect: (categoryId: string | null) => void;
-}
-
-export default function AppSidebar({ onCategorySelect }: AppSidebarProps) {
+export default function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [categoryName, setCategoryName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  console.log('Current:', selectedCategory);
-
-  const { userId } = useAuth();
-
-  const createCategory = useMutation(api.tasks.createCategory);
-  const categories = useQuery(api.tasks.getCategories) || [];
+  const { setSelectedCategoryId, createCategory, categories } = useCategory();
+  const { userId } = useUser();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -51,7 +42,7 @@ export default function AppSidebar({ onCategorySelect }: AppSidebarProps) {
 
     try {
       if (userId) {
-        await createCategory({ name: categoryName, userId });
+        await createCategory(categoryName, userId);
       } else {
         console.error("User ID is not available.");
       }
@@ -64,7 +55,7 @@ export default function AppSidebar({ onCategorySelect }: AppSidebarProps) {
   const handleCategoryClick = (categoryId: string) => {
     const newSelectedId = selectedCategory === categoryId ? null : categoryId;
     setSelectedCategory(newSelectedId);
-    onCategorySelect(newSelectedId);
+    setSelectedCategoryId(newSelectedId);
   };
 
   return (
@@ -100,6 +91,18 @@ export default function AppSidebar({ onCategorySelect }: AppSidebarProps) {
               </span>
             </Link>
           </li>
+
+          <li>
+            <Link
+              href="/dashboard/history"
+              className="flex items-center p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <MdHistory className="text-xl" />
+              <span className={cn("ml-2", isCollapsed && "hidden")}>
+                History
+              </span>
+            </Link>
+            </li>
         </ul>
 
         <div className={cn("mt-8", isCollapsed && "hidden")}>
@@ -119,7 +122,7 @@ export default function AppSidebar({ onCategorySelect }: AppSidebarProps) {
             </button>
           </form>
           <ul className="space-y-1">
-            {categories?.length > 0 ? (
+            {categories && categories.length > 0 ? (
               categories.map((category) => (
                 <li 
                   key={category._id}
