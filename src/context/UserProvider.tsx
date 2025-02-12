@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
+
 
 interface UserContextType {
   userId: string | null;
@@ -11,11 +13,21 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const { userId } = useAuth();
-  const [user, setUser] = useState<string | null>(null);
-
+  const [user, setUser] = useState<string | null | undefined>(undefined);
   useEffect(() => {
-    setUser(userId || null);
+    if (userId !== undefined) {
+      setUser(userId || null);
+    }
   }, [userId]);
+
+  // Prevent rendering until Clerk initializes
+  useEffect(() => {
+    if (user === null) {
+      redirect("/");
+    }
+  }, [user]);
+
+  if (user === undefined) return null;
 
   return (
     <UserContext.Provider value={{ userId: user }}>

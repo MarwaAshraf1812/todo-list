@@ -35,7 +35,7 @@ export default function ArchivedTasks() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 fixed_height">
+    <div className="max-w-6xl mx-auto  py-10 px-16 space-y-6 md:space-y-0 md:space-x-10 fixed_height">
       <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
         Archived Tasks
       </h1>
