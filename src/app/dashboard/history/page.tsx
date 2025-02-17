@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAuth } from "@clerk/clerk-react";
 
 type Task = {
   _id: string;
@@ -14,7 +15,8 @@ type Task = {
 };
 
 export default function ArchivedTasks() {
-  const archivedTasks = useQuery(api.tasks.getArchivedTasks);
+  const {userId} = useAuth();
+  const archivedTasks = useQuery(api.tasks.getArchivedTasks, userId ? { userId } : "skip");
   const deleteAllTasks = useMutation(api.tasks.deleteAllTasks);
   const [isDeleting, setIsDeleting] = useState(false);
 

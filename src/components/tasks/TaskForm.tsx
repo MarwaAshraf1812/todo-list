@@ -42,7 +42,7 @@ export function TaskForm({ onClose, initialCategoryId, task }: TaskFormProps) {
   const [status, setStatus] = useState(task?.status || "Todo");
 
   const { userId } = useAuth();
-  const categories = useQuery(api.tasks.getCategories);
+  const categories = useQuery(api.tasks.getCategories, {userId: userId as string});
   const createTask = useMutation(api.tasks.createTask);
   const updateTask = useMutation(api.tasks.updateTask);
 

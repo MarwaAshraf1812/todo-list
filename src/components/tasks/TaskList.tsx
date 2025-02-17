@@ -23,11 +23,11 @@ export default function TaskList() {
 
   const tasks = useQuery(
     selectedCategoryId
-      ? api.tasks.getTasksByCategory
+      ? api.tasks.getTasksByCategory 
       : api.tasks.getTasksByUser,
     selectedCategoryId
-      ? { categoryId: selectedCategoryId as Id<"categories"> }
-      : { userId: userId as string }
+      ? { categoryId: selectedCategoryId as Id<"categories">, userId: userId as string }
+      : { userId: userId as string },
   );
 
   const deleteTask = useMutation(api.tasks.deleteTask);

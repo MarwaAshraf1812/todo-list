@@ -2,10 +2,13 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const getCategories = query({
-  handler: async ({ db }) => {
-    return await db.query("categories").collect();
+  args: { userId: v.string() },
+  handler: async ({ db }, { userId }) => {
+    return await db.query("categories")
+      .filter(q => q.eq(q.field("userId"), userId))
+      .collect();
   },
-})
+});
 
 export const deleteCategory = mutation({
   args: { categoryId: v.id("categories") },
@@ -68,7 +71,9 @@ export const createTask = mutation({
 export const getTasksByUser = query({
   args: { userId: v.string() },
   handler: async ({ db }, { userId }) => {
-    return await db.query("tasks").filter((q) => q.eq("userId", userId)).collect();
+    return await db.query("tasks")
+      .filter(q => q.eq(q.field("userId"), userId))
+      .collect();
   },
 });
 
@@ -76,9 +81,19 @@ export const getTasksByUser = query({
  * Get tasks for a specific category
  */
 export const getTasksByCategory = query({
-  args: { categoryId: v.id("categories") },
-  handler: async ({ db }, { categoryId }) => {
-    return await db.query("tasks").filter((q) => q.eq(q.field("categoryId"), categoryId)).collect();
+  args: { 
+    categoryId: v.id("categories"),
+    userId: v.string()
+  },
+  handler: async ({ db }, { categoryId, userId }) => {
+    return await db.query("tasks")
+      .filter(q => 
+        q.and(
+          q.eq(q.field("categoryId"), categoryId),
+          q.eq(q.field("userId"), userId)
+        )
+      )
+      .collect();
   },
 });
 
@@ -172,8 +187,11 @@ export const deleteTask = mutation({
 
 
 export const getArchivedTasks = query({
-  handler: async ({ db }) => {
-    return await db.query("task_history").collect();
+  args: { userId: v.string() },
+  handler: async ({ db }, { userId }) => {
+    return await db.query("task_history")
+      .filter(q => q.eq(q.field("userId"), userId))
+      .collect();
   },
 });
 
