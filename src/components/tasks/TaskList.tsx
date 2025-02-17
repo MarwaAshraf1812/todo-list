@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, Id, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useCategory } from "@/context/CategoryContext";
@@ -9,13 +9,15 @@ import { TaskForm } from "./TaskForm";
 import { TaskColumn } from "./TaskColumn";
 import { EmptyState } from "./EmptyState";
 import { Priority, Task } from "@/types/task";
-import { useUser } from "@/context/UserProvider";
+import { useAuth } from "@clerk/nextjs"; 
+import { useRouter } from "next/navigation";
 
 
 
 export default function TaskList() {
   const [showNewTaskForm, setShowNewTaskForm] = useState(false);
-  const { userId } = useUser();
+  const { userId, isLoaded } = useAuth();
+  const router = useRouter();
   const { selectedCategoryId } = useCategory();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
@@ -54,6 +56,16 @@ export default function TaskList() {
     In_Progress: { color: "bg-yellow-100", title: "In Progress" },
     Completed: { color: "bg-green-100", title: "Completed" },
   };
+
+  useEffect(() => {
+    if (isLoaded && !userId) {
+      router.push("/");
+    }
+  }, [userId, isLoaded, router]);
+
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">

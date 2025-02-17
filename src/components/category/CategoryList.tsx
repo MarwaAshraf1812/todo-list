@@ -5,12 +5,13 @@ import { useState } from "react";
 import { useCategory } from "@/context/CategoryContext";
 import { CategoryItem } from "./CategoryItem";
 import { CategoryInputForm } from "./CategoryInputForm";
-import { useUser } from "@/context/UserProvider";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { useAuth } from "@clerk/clerk-react";
+import { redirect } from "next/navigation";
 
 export function CategoryList() {
-  const { userId } = useUser();
+  const { userId } = useAuth();
   const { categories, createCategory, setSelectedCategoryId } = useCategory();
   const [showInput, setShowInput] = useState(false);
   const deleteCategoryMutation = useMutation(api.tasks.deleteCategory);
@@ -24,7 +25,7 @@ export function CategoryList() {
       if (userId) {
         await createCategory(name, userId);
       } else {
-        console.error("User ID is null");
+        redirect("/");
       }
       setShowInput(false);
     }

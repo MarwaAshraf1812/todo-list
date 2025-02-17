@@ -9,7 +9,7 @@ import { FaPlus } from "react-icons/fa";
 import { MdHistory } from "react-icons/md";
 import { cn } from "@/lib/utils";
 import { useCategory } from "@/context/CategoryContext";
-import { useUser } from "@/context/UserProvider";
+import { useAuth } from "@clerk/clerk-react";
 
 export default function AppSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -17,7 +17,7 @@ export default function AppSidebar() {
   const [categoryName, setCategoryName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { setSelectedCategoryId, createCategory, categories } = useCategory();
-  const { userId } = useUser();
+  const { userId } = useAuth();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
